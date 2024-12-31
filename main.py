@@ -4,10 +4,8 @@ if user_input == "1":
     new_password = input("Please enter your new password: ")
     with open('passwords.txt', 'a') as file:
         file.write(new_password + '\n')
-    import os
-    if not os.path.exists('balance.txt'):
-        with open('balance.txt', 'w') as file:
-            file.write('500')
+    with open(f'{new_password}_balance.txt', 'w') as file:
+        file.write('500')
     print("You have successfully created a new account. Your balance is $500.")
     user_input = new_password  
 
@@ -19,7 +17,16 @@ if user_input in passwords:
 else:
     print("Incorrect password! Please try again.")
     exit()
+    try:
+        with open('balances.txt', 'r') as file:
+            balances = dict(line.strip().split(':') for line in file)
+    except FileNotFoundError:
+        balances = {}
 
+    if user_input not in balances:
+        balances[user_input] = 500  # Initialize new user balance to 500
+
+    balance = int(balances[user_input])
 choice = input("Would you like to calculate interest or check your balance? (I interest, B balance) ").upper()
 
 if choice == "I":
@@ -51,12 +58,13 @@ if choice == "I":
 
     final_amount = principle * (1 + rate / 100) ** time
     print(f"Balance after {time} years: ${final_amount}")
+    exit()
 
-if choice == "B":
+elif choice == "B":
     try:
-        with open('balance.txt', 'r') as file:
+        with open(f'{user_input}_balance.txt', 'r') as file:
             balance = int(file.read())
-        print(f"Currently checking balance. Your balance is ${balance}")
+        print(f"Currently checking balance. Your balance is: ${balance}")
     except FileNotFoundError:
         balance = 0
 
@@ -78,38 +86,10 @@ if choice == "B":
         print("Invalid choice! Please try again.")
         exit()
 
-    with open('balance.txt', 'w') as file:
+    with open(f'{user_input}_balance.txt', 'w') as file:
         file.write(str(balance))
 
     print(f"Your current balance is ${balance}")
-
-exit_prompt = input("Press E to exit: ")
-
-if exit_prompt.upper() == "E":
-    exit()
-else:
-    exit()
-
-if balance_action == "W":
-    print("Withdrawing money")
-    amount = int(input("How much would you like to withdraw? "))
-    if amount > balance:
-        print("Insufficient funds.")
-        exit()
-    else:
-        balance -= amount
-elif balance_action == "D":
-    print("Depositing money")
-    amount = int(input("How much would you like to deposit? "))
-    balance += amount
-else:
-    print("Invalid choice! Please try again.")
-    exit()
-
-with open('balance.txt', 'w') as file:
-    file.write(str(balance))
-
-print(f"Your current balance is ${balance}")
 
 exit_prompt = input("Press E to exit: ")
 
