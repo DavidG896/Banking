@@ -4,10 +4,21 @@ if user_input == "1":
     new_password = input("Please enter your new password: ")
     with open('passwords.txt', 'a') as file:
         file.write(new_password + '\n')
-    with open(f'{new_password}_balance.txt', 'w') as file:
-        file.write('500')
+    
+    try:
+        with open('balances.txt', 'r') as file:
+            balances = dict(line.strip().split(':') for line in file)
+    except FileNotFoundError:
+        balances = {}
+
+    balances[new_password] = '500'  # Initialize new account with $500 balance
+
+    with open('balances.txt', 'w') as file:
+        for user, balance in balances.items():
+            file.write(f"{user}:{balance}\n")
+
     print("You have successfully created a new account. Your balance is $500.")
-    user_input = new_password  
+    user_input = new_password
 
 with open('passwords.txt', 'r') as file:
     passwords = file.read().splitlines()
@@ -17,56 +28,59 @@ if user_input in passwords:
 else:
     print("Incorrect password! Please try again.")
     exit()
-    try:
-        with open('balances.txt', 'r') as file:
-            balances = dict(line.strip().split(':') for line in file)
-    except FileNotFoundError:
-        balances = {}
 
-    if user_input not in balances:
-        balances[user_input] = 500  # Initialize new user balance to 500
+try:
+    with open('balances.txt', 'r') as file:
+        balances = dict(line.strip().split(':') for line in file)
+except FileNotFoundError:
+    balances = {}
 
-    balance = int(balances[user_input])
+if user_input not in balances:
+    balances[user_input] = '500'  # Initialize balance for a new user
+
+balance = int(balances[user_input])
+
 choice = input("Would you like to calculate interest or check your balance? (I interest, B balance) ").upper()
 
 if choice == "I":
     print("Currently calculating interest")
-    principle = 0
-    rate = 0
-    time = 0
+    
+    while True:
+        try:
+            principle = float(input("Enter the principal amount: "))
+            if principle < 0:
+                print("Principal can't be less than 0")
+            else:
+                break
+        except ValueError:
+            print("Please enter a valid number.")
 
     while True:
-        principle = float(input("Enter the principal amount: "))
-        if principle < 0:
-            print("Principal can't be less than 0")
-        else:
-            break
+        try:
+            rate = float(input("Enter the rate amount: "))
+            if rate < 0:
+                print("Rate can't be less than 0")
+            else:
+                break
+        except ValueError:
+            print("Please enter a valid number.")
 
     while True:
-        rate = float(input("Enter the rate amount: "))
-        if rate < 0:
-            print("Rate can't be less than 0")
-        else:
-            break
-
-    while True:
-        time = int(input("Enter the time in years: "))
-        if time <= 0:
-            print("Time can't be 0 or less")
-        else:
-            break
+        try:
+            time = int(input("Enter the time in years: "))
+            if time <= 0:
+                print("Time can't be 0 or less")
+            else:
+                break
+        except ValueError:
+            print("Please enter a valid number.")
 
     final_amount = principle * (1 + rate / 100) ** time
-    print(f"Balance after {time} years: ${final_amount}")
+    print(f"Balance after {time} years: ${final_amount:.2f}")
     exit()
 
 elif choice == "B":
-    try:
-        with open(f'{user_input}_balance.txt', 'r') as file:
-            balance = int(file.read())
-        print(f"Currently checking balance. Your balance is: ${balance}")
-    except FileNotFoundError:
-        balance = 0
+    print(f"Currently checking balance. Your balance is: ${balance}")
 
     balance_action = input("Would you like to withdraw or deposit? (W withdraw, D deposit) ").upper()
 
@@ -86,8 +100,11 @@ elif choice == "B":
         print("Invalid choice! Please try again.")
         exit()
 
-    with open(f'{user_input}_balance.txt', 'w') as file:
-        file.write(str(balance))
+    balances[user_input] = str(balance)
+
+    with open('balances.txt', 'w') as file:
+        for user, balance in balances.items():
+            file.write(f"{user}:{balance}\n")
 
     print(f"Your current balance is ${balance}")
 
