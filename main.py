@@ -52,24 +52,43 @@ if choice == "I":
     final_amount = principle * (1 + rate / 100) ** time
     print(f"Balance after {time} years: ${final_amount}")
 
+if choice == "B":
+    try:
+        with open('balance.txt', 'r') as file:
+            balance = int(file.read())
+        print(f"Currently checking balance. Your balance is ${balance}")
+    except FileNotFoundError:
+        balance = 0
+
+    balance_action = input("Would you like to withdraw or deposit? (W withdraw, D deposit) ").upper()
+
+    if balance_action == "W":
+        print("Withdrawing money")
+        amount = int(input("How much would you like to withdraw? "))
+        if amount > balance:
+            print("Insufficient funds.")
+            exit()
+        else:
+            balance -= amount
+    elif balance_action == "D":
+        print("Depositing money")
+        amount = int(input("How much would you like to deposit? "))
+        balance += amount
+    else:
+        print("Invalid choice! Please try again.")
+        exit()
+
+    with open('balance.txt', 'w') as file:
+        file.write(str(balance))
+
+    print(f"Your current balance is ${balance}")
+
 exit_prompt = input("Press E to exit: ")
 
 if exit_prompt.upper() == "E":
     exit()
 else:
     exit()
-
-if choice == "B":
-    try:
-        with open('balance.txt', 'r') as file:
-            balance = int(file.read())
-        print(f"Currently checking balance. Your balance is ${balance}")
-        with open('balance.txt', 'r') as file:
-            balance = int(file.read())
-    except FileNotFoundError:
-        balance = 0
-
-    balance_action = input("Would you like to withdraw or deposit? (W withdraw, D deposit) ").upper()
 
 if balance_action == "W":
     print("Withdrawing money")
